@@ -1,0 +1,16 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - $(aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 061280019180.dkr.ecr.ap-south-1.amazonaws.com)
+  build:
+    commands:
+      - docker build -t mahi-ecr .
+      - docker tag mahi-ecr:latest 061280019180.dkr.ecr.ap-south-1.amazonaws.com/mahi-ecr:latest
+  post_build:
+    commands:
+      - docker push 061280019180.dkr.ecr.ap-south-1.amazonaws.com/mahi-ecr:latest
+      - printf '[{"name":<TASK_DEFINITION_NAME>,"imageUri":"%s"}]' <ECR_URL> > imagedefinitions.json
+artifacts:
+  files: imagedefinitions.json
